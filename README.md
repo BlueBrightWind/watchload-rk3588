@@ -40,4 +40,4 @@ Examples:
  - Viewing the load of some devices requires sudo permissions(devices in /sys/kernel/debug/**)
 
 ## Acknowledgments
-https://github.com/Tang-JingWei/watchload-for-rk3588
+The project is based on: https://github.com/Tang-JingWei/watchload-for-rk3588
