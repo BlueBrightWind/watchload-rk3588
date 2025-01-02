@@ -1,6 +1,8 @@
 # watchload for 3588/3588s
 The project is mainly designed to conveniently view information about the devices(CPU/GPU/RGA/NPU/MEM), and provide the ability to switch between different modes of operation for the devices.
 
+![示例图片](image/screenshot.jpg)
+
 ## Highlights
  - Monitor support automatically adjust the size base on the console window size.
  - Monitor support customize the devices being monitored.
