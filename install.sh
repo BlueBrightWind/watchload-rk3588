@@ -76,6 +76,7 @@ change_performance_mode() {
     echo performance | sudo tee /sys/class/devfreq/fdab0000.npu/governor > /dev/null
     # MEM
     echo performance | sudo tee /sys/class/devfreq/dmc/governor > /dev/null
+    echo Current device mode: performance
 }
 
 change_ondemand_mode() {
@@ -89,6 +90,7 @@ change_ondemand_mode() {
     echo simple_ondemand | sudo tee /sys/class/devfreq/fdab0000.npu/governor > /dev/null
     # MEM
     echo simple_ondemand | sudo tee /sys/class/devfreq/dmc/governor > /dev/null
+    echo Current device mode: ondemand
 }
 
 change_powersave_mode() {
@@ -102,6 +104,7 @@ change_powersave_mode() {
     echo powersave | sudo tee /sys/class/devfreq/fdab0000.npu/governor > /dev/null
     # MEM
     echo powersave | sudo tee /sys/class/devfreq/dmc/governor > /dev/null
+    echo Current device mode: powersave
 }
 
 # Parse Args
