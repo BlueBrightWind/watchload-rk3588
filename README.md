@@ -14,6 +14,10 @@ git clone https://github.com/BlueBrightWind/watchload-for-rk3588.git --depth=1 w
 cd watchload
 sudo bash install.sh
 ```
+**The install script will do the following things:**
+ - Install python3-pip and install psutil for python
+ - Generate the watchload script in the installation directory
+ - Copy the monitor.py to the installation directory
 
 ## How to use
 ```bash
@@ -30,3 +34,10 @@ Examples:
     watchload -s cgmn -n 2
     watchload --mode performance
 ```
+
+## Why the script need sudo permissions
+ - Only sudo users can modify device mode
+ - Viewing the load of some devices requires sudo permissions(devices in /sys/kernel/debug/**)
+
+## Acknowledgments
+https://github.com/Tang-JingWei/watchload-for-rk3588
