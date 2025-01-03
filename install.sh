@@ -182,3 +182,6 @@ sudo cp monitor.py $WATCHLOAD_INSTALL_PATH/script
 echo  >> ~/.bashrc
 echo '# Watchload Tool' >> ~/.bashrc
 echo export PATH=$WATCHLOAD_INSTALL_PATH/bin:'$PATH' >> ~/.bashrc
+
+# Apply Bash Environment
+source ~/.bashrc
