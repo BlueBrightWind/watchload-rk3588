@@ -18,6 +18,9 @@ sudo bash install.sh
  - Install python3-pip and install psutil for python
  - Generate the watchload script in the installation directory
  - Copy the monitor.py to the installation directory
+ - Add execution permissions to watchload script
+ - Set bash environment for watchload script
+ - Apply the bash environment
 
 ## How to use
 ```bash
