@@ -107,8 +107,8 @@ class BaseRenderer(object):
         self.clear_line(self.y_offset+2)
         self.stdscr.addstr(self.y_offset+2, self.x_offset, '|' + '-'*(self.container_max_width-2) + '|')
 
-    def draw_bar(self, label, values, offset=3):
-        prefix_offset_length = 11 + 9
+    def draw_bar(self, label, values, freqs=None, offset=3):
+        prefix_offset_length = 7 + 7 + 10 + 1
         suffix_offset_length = 2
         column = ORDER.column
         column_width = math.floor(self.container_max_width / column)
@@ -118,10 +118,14 @@ class BaseRenderer(object):
         for i, value in enumerate(values):
             bar_length = int((value / 100) * bar_max_width)
             color = 1 if value < 50 else 2  # 确定条形图颜色: 低于 50% 使用颜色1，其他使用颜色2
-            if len(values) > 1:
-                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}{i}:".ljust(11) + f"{value}% | ".rjust(9))
+            if freqs is not None:
+                freq = format(freqs[i], ".1f") + " GHz"
             else:
-                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}:".ljust(11) + f"{value}% | ".rjust(9))
+                freq = ""
+            if len(values) > 1:
+                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}{i}: ".ljust(7) + f"{freq}".ljust(7) + f"{format(value, '.1f')}% | ".rjust(10))
+            else:
+                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}:  ".ljust(7) + f"{freq}".ljust(7) + f"{format(value, '.1f')}% | ".rjust(10))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length, "▩" * bar_length, curses.color_pair(color))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length + bar_length, " " * (bar_max_width - bar_length))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length + bar_max_width, " |")
@@ -132,8 +136,8 @@ class BaseRenderer(object):
             for i in range(column - len(values) % column):
                 self.stdscr.addstr(y_offset, self.x_offset + (column - i - 1) * column_width, "|" + " " * (column_width - 2) + "|")
 
-    def draw_bar_memory(self, load, used, offset=3):
-        prefix_offset_length = 11 + 9
+    def draw_bar_memory(self, load, used, freqs=None,offset=3):
+        prefix_offset_length = 7 + 7 + 10 + 1
         suffix_offset_length = 2
         column = ORDER.column
         column_width = math.floor(self.container_max_width / column)
@@ -141,11 +145,15 @@ class BaseRenderer(object):
         y_offset = self.y_offset + offset
 
         labels = ["LOAD", "USED"]
+        freq = format(freqs[0], ".1f") + " GHz"
         for i, label in enumerate(labels):
             value = load[0] if i == 0 else used[0]
             bar_length = int((value / 100) * bar_max_width)
             color = 1 if value < 50 else 2  # 确定条形图颜色: 低于 50% 使用颜色1，其他使用颜色2
-            self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}:".ljust(11) + f"{value}% | ".rjust(9))
+            if i == 0:
+                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}: ".ljust(7) + f"{freq}".ljust(7) + f"{format(value, '.1f')}% | ".rjust(10))
+            else:
+                self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width, f"| {label}: ".ljust(7) + f"".ljust(7) + f"{format(value, '.1f')}% | ".rjust(10))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length, "▩" * bar_length, curses.color_pair(color))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length + bar_length, " " * (bar_max_width - bar_length))
             self.stdscr.addstr(y_offset, self.x_offset + (i % column) * column_width + prefix_offset_length + bar_max_width, " |")
@@ -160,6 +168,7 @@ class CpuInfo(BaseRenderer):
     def __init__(self, stdscr):
         super().__init__(stdscr)
         self.mode = []
+        self.freq = []
         self.load = []
 
     def update(self):
@@ -172,22 +181,33 @@ class CpuInfo(BaseRenderer):
                 process = subprocess.run(['sudo', 'cat', f'/sys/devices/system/cpu/cpufreq/{dir}/scaling_governor'], stdout=subprocess.PIPE)
                 output = process.stdout.decode('utf-8').strip()
                 mode.append(output)
+            freq = []
+            for dir in dirs:
+                process = subprocess.run(['sudo', 'cat', f'/sys/devices/system/cpu/cpufreq/{dir}/related_cpus'], stdout=subprocess.PIPE)
+                output = process.stdout.decode('utf-8').strip()
+                cpus = output.split(" ")
+                process = subprocess.run(['sudo', 'cat', f'/sys/devices/system/cpu/cpufreq/{dir}/cpuinfo_cur_freq'], stdout=subprocess.PIPE)
+                output = process.stdout.decode('utf-8').strip()
+                freq = freq + [int(output) / 1000000 for _ in cpus]
             self.mode = mode
             self.load = load
+            self.freq = freq
         except Exception as e:
             print("Error when getting cpu info:", e)
             self.mode = []
             self.load = []
+            self.freq = []
 
     def render(self):
         self.draw_mode("CPU", self.mode)
-        self.draw_bar("CPU", self.load)
+        self.draw_bar("CPU", self.load, self.freq)
         
 class NpuInfo(BaseRenderer):
     def __init__(self, stdscr):
         super().__init__(stdscr)
         self.mode = []
         self.load = []
+        self.freq = []
 
     def update(self):
         self.y_offset = len(logo) + ORDER.npu_offset + 1
@@ -199,16 +219,21 @@ class NpuInfo(BaseRenderer):
             process = subprocess.run(['sudo', 'cat', '/sys/kernel/debug/rknpu/load'], stdout=subprocess.PIPE)
             output = process.stdout.decode('utf-8').strip()
             load = [int(x) for x in re.findall(r'Core\d+: *(\d+)%', output)]
+            process = subprocess.run(['sudo', 'cat', '/sys/class/devfreq/fdab0000.npu/cur_freq'], stdout=subprocess.PIPE)
+            output = process.stdout.decode('utf-8').strip()
+            freq = [int(output) / 1000000000 for _ in load]
             self.mode = mode
             self.load = load
+            self.freq = freq
         except Exception as e:
             print("Error when getting npu info:", e)
             self.mode = []
             self.load = []
+            self.freq = []
 
     def render(self):
         self.draw_mode("NPU", self.mode)
-        self.draw_bar("NPU", self.load)
+        self.draw_bar("NPU", self.load, self.freq)
 
 class GpuInfo(BaseRenderer):
     def __init__(self, stdscr):
@@ -234,7 +259,7 @@ class GpuInfo(BaseRenderer):
                 raise Exception("result match error")
             self.mode = mode
             self.load = [int(load)]
-            self.freq = [int(freq)]
+            self.freq = [int(freq) / 1000000000]
         except Exception as e:
             print("Error when getting gpu info:", e)
             self.mode = []
@@ -243,7 +268,7 @@ class GpuInfo(BaseRenderer):
 
     def render(self):
         self.draw_mode("GPU", self.mode)
-        self.draw_bar("GPU", self.load)
+        self.draw_bar("GPU", self.load, self.freq)
     
 class RgaInfo(BaseRenderer):
     def __init__(self, stdscr):
@@ -291,15 +316,16 @@ class MemInfo(BaseRenderer):
             self.mode = mode
             self.load = [int(load)]
             self.used = [float(used)]
-            self.freq = [int(freq)]
+            self.freq = [int(freq) / 1000000000]
         except Exception as e:
             print("Error when getting memory info:", e)
             self.mode = []
             self.load = []
+            self.freq = []
 
     def render(self):
         self.draw_mode("MEM", self.mode)
-        self.draw_bar_memory(self.load, self.used)
+        self.draw_bar_memory(self.load, self.used, self.freq)
 
 class Logo(BaseRenderer):
     def __init__(self, stdscr):
