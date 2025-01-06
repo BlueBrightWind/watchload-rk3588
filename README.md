@@ -8,20 +8,6 @@ The project is mainly designed to conveniently view information about the device
  - Monitor support customize the devices being monitored.
  - Support device mode quick switching between performance/ondemand/powersave.
 
-## How to install
-```bash
-git clone https://github.com/BlueBrightWind/watchload-for-rk3588.git --depth=1 watchload
-cd watchload
-sudo bash install.sh
-```
-**The install script will do the following things:**
- - Install python3-pip and install psutil for python
- - Generate the watchload script in the installation directory
- - Copy the monitor.py to the installation directory
- - Add execution permissions to watchload script
- - Set bash environment for watchload script
- - Apply the bash environment
-
 ## How to use
 ```bash
 Options:
@@ -36,6 +22,15 @@ Options:
 Examples:
     watchload -s cgmn -n 2
     watchload --mode performance
+```
+
+## How to build
+```bash
+git clone https://github.com/BlueBrightWind/watchload-for-rk3588.git --depth=1 watchload
+cd watchload
+sudo apt install python3-pip
+pip3 install pyinstaller psutil
+pyinstaller watchload.py
 ```
 
 ## Why the script need sudo permissions
