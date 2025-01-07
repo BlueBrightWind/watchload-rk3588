@@ -8,13 +8,15 @@ from render.npu_render import NpuRender
 from render.mem_render import MemRender
 from render.rga_render import RgaRender
 from render.logo_render import LogoRender
+from render.temp_render import TempRender
 
 class Monitor(object):
-    def __init__(self, stdscr, interval=1, devices=['CPU', 'GPU', 'MEM', 'NPU', 'RGA']):
+    def __init__(self, stdscr, interval=1, devices=['CPU', 'GPU', 'MEM', 'NPU', 'RGA'], temps=['CPU', 'GPU', 'NPU']):
         self.stdscr = stdscr
         self.interval = interval
         BaseRender.change_devices(devices)
         self.logo = LogoRender(stdscr)
+        self.temp = TempRender(stdscr, temps)
         self.cpu = CpuRender(stdscr)
         self.gpu = GpuRender(stdscr)
         self.npu = NpuRender(stdscr)
@@ -32,6 +34,7 @@ class Monitor(object):
             BaseRender.change_width(width, container_width)
             BaseRender.offset.update_column(column)
             self.stdscr.clear()
+        self.temp.update() if 'TEMP' in BaseRender.devices else None
         self.cpu.update() if 'CPU' in BaseRender.devices else None
         self.gpu.update() if 'GPU' in BaseRender.devices else None
         self.npu.update() if 'NPU' in BaseRender.devices else None
@@ -40,6 +43,7 @@ class Monitor(object):
 
     def render(self):
         self.logo.render()
+        self.temp.render() if 'TEMP' in BaseRender.devices else None
         self.cpu.render() if 'CPU' in BaseRender.devices else None
         self.gpu.render() if 'GPU' in BaseRender.devices else None
         self.npu.render() if 'NPU' in BaseRender.devices else None

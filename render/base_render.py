@@ -6,7 +6,7 @@ class BaseOffset(object):
         self.column = 1
         self.title_length = 3
         self.devices = devices
-        self.offset_dict = {'CPU': 8, 'GPU': 1, 'NPU': 3, 'RGA': 3, 'MEM': 2}
+        self.offset_dict = {'CPU': 8, 'GPU': 1, 'NPU': 3, 'RGA': 3, 'MEM': 2, 'TEMP': 1}
 
     def update_dict(self, label, value):
         self.offset_dict[label] = value
@@ -61,6 +61,14 @@ class BaseOffset(object):
         for i in range(index):
             offset += math.ceil(self.offset_dict[self.devices[i]] / self.column) + self.title_length
         return offset  
+    
+    @property
+    def temp_offset(self):
+        index = self.devices.index('TEMP')
+        offset = 0
+        for i in range(index):
+            offset += math.ceil(self.offset_dict[self.devices[i]] / self.column) + self.title_length
+        return offset  
 
 class BaseRender(object):
     x_offset = 0
@@ -77,7 +85,7 @@ class BaseRender(object):
         "                                    ",
         "====================================",
     ]
-    devices = ['CPU', 'GPU', 'MEM', 'NPU', 'RGA']
+    devices = ['TEMP', 'CPU', 'GPU', 'MEM', 'NPU', 'RGA']
     offset = BaseOffset(devices)
 
     @staticmethod

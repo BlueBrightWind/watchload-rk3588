@@ -12,8 +12,10 @@ The project is mainly designed to conveniently view information about the device
 ```bash
 Options:
     -h, --help      show the help message
-    -s, --show      show options   (combination of c,g,n,r,m)
-                    set the device information and display order in the monitor(cpu/gpu/npu/rga/memory), default is cgmnr
+    -s, --show      show options   (combination of t,c,g,n,r,m)
+                    set the device information and display order in the monitor(temperature/cpu/gpu/npu/rga/memory), default is tcgmnr
+    -t, --temp      show temperatures (combination of c,g,n)
+                    set the temperature information(cpu/gpu/npu), default is cgn           
     -n, --interval  interval time  (number)
                     set the refresh interval time (seconds) of the monitor, default is 1
     -m, --mode      mode selection (ondemand/performance/powersave/none)
